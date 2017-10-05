@@ -2,11 +2,20 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 
-let text, button;
+let text, button, toggle;
+
 
 function _hideHello() {
-    Main.uiGroup.remove_actor(text);
-    text = null;
+    Tweener.addTween(text, {
+        x: 0 - text.width,
+        y: 0 - text.height,
+        time: .5,
+        transition: 'easeOutExpo',
+        onComplete: () => {
+            Main.uiGroup.remove_actor(text);
+            text = null;
+        }
+    });
 }
 
 function _showHello() {
@@ -22,15 +31,15 @@ function _showHello() {
 
     let monitor = Main.layoutManager.primaryMonitor;
 
-    text.set_position(monitor.x + Math.floor(monitor.width / 2 - text.width / 2),
-        monitor.y + Math.floor(monitor.height / 2 - text.height / 2));
+    text.set_position(0 - text.width, 0 - text.height);
+    // monitor.y + Math.floor(monitor.height / 2 - text.height / 2));
 
-//    Tweener.addTween(text, {
-//        opacity: 0,
-//        time: 9,
-//        transition: 'easeOutQuad',
-//        onComplete: _hideHello
-//    });
+    Tweener.addTween(text, {
+        x: Math.floor(monitor.width / 2 - text.width / 2),
+        y: Math.floor(monitor.height / 2 - text.height / 2),
+        time: .5,
+        transition: 'easeOutExpo'
+    });
 }
 
 function init() {
@@ -47,8 +56,16 @@ function init() {
         style_class: 'system-status-icon'
     });
 
+    toggle = false;
     button.set_child(icon);
-    button.connect('button-press-event', _showHello);
+    button.connect('button-press-event', () => {
+        toggle = !toggle;
+        if (toggle == true) {
+            _showHello();
+        } else {
+            _hideHello();
+        }
+    });
 }
 
 function enable() {
